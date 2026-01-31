@@ -1,3 +1,6 @@
+from pyvest.source.priceseries import PriceSeries
+from pyvest.source.constant import CurrencyEnum
+
 class Asset:
     """
     Représente un actif financier avec son historique de prix.
@@ -78,12 +81,50 @@ class Asset:
          return self.prices.max_drawdown()
 
     def correlation_with(self, other: "Asset") -> float:
-         """
-         Calcule la corrélation de Pearson des log-rendements avec un autre actif.
+        """
+        Calcule la corrélation de Pearson des log-rendements avec un autre actif.
 
-         Args:
+        Args:
              other: Un autre Asset
 
-         Returns:
+        Returns:
              Coefficient de corrélation entre -1 et 1
-         """
+        """
+        x = self.prices.get_all_log_returns()
+        y = other.prices.get_all_log_returns()
+
+        n = min(len(x), len(y))
+
+        x, y = x[:n], y[:n]
+
+        sum_x = 0.0
+        for val in x : 
+             sum_x += val
+        mean_x = sum_x / x
+
+        sum_y = 0.0
+        for val in y : 
+             sum_y += val
+        mean_y = sum_y / y
+
+        cov_s = 0.0
+        var_x_s = 0.0
+        var_y_s = 0.0
+
+        for i in range(n): 
+            cx = x[i]- mean_x  
+            cy = y[i] - mean_y 
+            cov_s += cx * cy
+            var_x_s += cx * cx
+            var_y_s += cy * cy 
+
+        cov = cov_s /(n-1)
+        var_x = var_x_s / (n-1)
+        var_y = var_y_s /(n-1)
+
+        correlation = cov / (var_x ** (1/2)) * (var_y ** (1/2))
+
+        return correlation
+
+    
+
